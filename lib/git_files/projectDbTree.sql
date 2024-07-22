@@ -29,16 +29,16 @@ PGPASSWORD='Buddyrich134' psql -U jimmy -d user_validation -- not commanded for 
         ...
 
 - flutter_test1
-    - price
-        - open
-        - high
-        - low
-        - close
+    - daily
         - da
-        - symbol
         - codename
+        - symbol
         - industry
-        - daily_pct_change
+        - op
+        - hi
+        - lo
+        - cl
+        ** daily_pct_change
         
     - ...
     - ...
@@ -74,6 +74,19 @@ CREATE TABLE user_information (
 INSERT INTO user_information (username, user_email, user_password, user_phone_number) VALUES ('test', 'test', 'test', 'test');
 select * from user_information limit 110;
 =================================
+CREATE TABLE daily (
+    da DATE,
+    codename VARCHAR(100),
+    symbol VARCHAR(100),
+    industry VARCHAR(100),
+    op FLOAT,
+    hi FLOAT,
+    lo FLOAT,
+    cl FLOAT
+);
+
+
+
 CREATE TABLE purchase (
     user_email VARCHAR(100) NOT NULL,
     strategy_1 BOOLEAN DEFAULT FALSE,

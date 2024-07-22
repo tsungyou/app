@@ -59,7 +59,7 @@ createrole -- allows the role to create another role
 login -- allows the roles to login to the database
 replication encrypted password '123456';
 -- return CREATE ROLE
-
+TRUNCATE TABLE daily;
 psql -d mydatabase // change database instead of start connecting to mydatabase: \c flutter_test1
 psql -U myuser -d mydatabase
 psql -h myhost -p 5432 -U myuser -d mydatabase
