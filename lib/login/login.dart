@@ -13,46 +13,54 @@ class Login extends StatefulWidget {
 }
 
 class LoginPageState extends State<Login> {
-  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
 
   void _login() async {
-    final loginUsername = _usernameController.text;
+    final loginEmail = _emailController.text;
     final loginPassword = _passwordController.text;
 
     // Add your login logic here
-    if (loginUsername.isNotEmpty && loginPassword.isNotEmpty) {
-      if (loginUsername.isNotEmpty) {
-        // Perform login
+    if (loginEmail.isNotEmpty && loginPassword.isNotEmpty) {
+      final conn = DatabaseService(
+        host: 'localhost', 
+        port: 5432, 
+        databaseName: 'user_validation', 
+        username: 'test', 
+        password: ''
+      );
+      final user = await conn.checkUser(loginEmail, loginPassword);
+      if(user != null){
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const Home()),
         );
-      }
-    } else {
-      // Show error
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Error'),
-          content: const Text('Please enter LoginUsername and LoginPassword'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-    }
+      conn.closeConnection();
+      } else { _showErrorDialog("email and password combination doesn't exist");}
+    } else { _showErrorDialog('Please enter LoginUsername and LoginPassword');}
   }
   void _register() {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const Register()),
+    );
+  }
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
     );
   }
   @override
@@ -67,7 +75,7 @@ class LoginPageState extends State<Login> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             TextField(
-              controller: _usernameController,
+              controller: _emailController,
               decoration: const InputDecoration(
                 labelText: 'Username',
               ),
@@ -91,7 +99,7 @@ class LoginPageState extends State<Login> {
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }

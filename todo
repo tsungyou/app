@@ -1,0 +1,11 @@
+1. Home()TabViews數量自個別訂閱數量定義
+    -- 資料庫設計 : Design sql Columns by Strategy ? by plans, 
+                    where each plan has more than one strategy
+2. 從資料庫select 股價
+    -- 股價圖細節設計
+3. register 手機簡訊驗證
+4. appStore 收費
+5. 上架路徑
+
+Problems:
+using iPhone as flutter app simulator

@@ -13,3 +13,17 @@ class StockData {
     required this.cl,
   });
 }
+
+class StockSnapshot {
+  final int symbol;
+  final String codename;
+  final String industry;
+  final String ranking;
+
+  StockSnapshot({
+    required this.symbol,
+    required this.codename,
+    required this.industry,
+    required this.ranking,
+  });
+}
