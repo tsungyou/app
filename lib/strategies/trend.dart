@@ -1,38 +1,86 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:test_empty_1/stocks/detailExample.dart';
-import 'package:test_empty_1/strategies/intraday.dart';
-import 'buy_hold.dart';
-class TodoItem {
-  final String title;
-  final String description;
-  final String classification;
-  final int volume;
-  final String investOrder;
-  final double closePrice;
-  final double percentage;
+import 'package:http/http.dart' as http;
 
-  const TodoItem(
-    this.title, 
-    this.description, 
-    this.classification, 
-    this.volume,
-    this.investOrder,
-    this.closePrice,
-    this.percentage,);
+class Trend extends StatefulWidget {
+  const Trend({super.key});
+  
+  @override
+  State<Trend> createState() => _TrendState();
 }
 
-class Trend extends StatelessWidget {
-  const Trend({super.key});
+class _TrendState extends State<Trend> {
+  final String start = DateTime.now().subtract(const Duration(days: 90)).toString().substring(0, 10);
+  late List<Map<String, dynamic>> trendData;
+  late List<Map<String, dynamic>> trendStockPrice;
+  late Map<String, stockFundamentals> trendStockFundamentals = {};
+  Map<String, dynamic> groupedTrendStockPrice = {};
+  List<String> trendStockList = [];
+  @override
+  void initState() {
+    super.initState();
+    fetchStrategyTrend();
+    fetchStockPrice();
+    fetchFundamentals();
+  }
+  Future<void> fetchFundamentals() async {
+    var url = Uri.parse('http://localhost:8080/fundamentals?symbols=2330,2317,2454,3231');
+    var response = await http.get(url);
+    setState(() {
+      trendStockFundamentals = jsonDecode(response.body)
+        .map<String, stockFundamentals>((item) => {
+              stockFundamentals(item['symbol'], item['codename'], item['industry']),
+          })
+        .toList();
+    });
+    print(trendStockFundamentals);
+  }
 
-  // Sample data
-  final List<TodoItem> items = const [
-    TodoItem('台積電', '2330', "IC", 12345, "(1)", 1000, 2.3),
-    TodoItem('聯發科', '1111', "IC", 12345, '(2)', 255, 3.6),
-    TodoItem('黑松', '1234', "IC", 23456, "(3)", 13, 1),
-    TodoItem('鴻海', '2317', "IC", 23456, "(4)", 200, 9.9),
-  ];
+  Future<void> fetchStrategyTrend() async {
+    var url = Uri.parse('http://localhost:8080/trend'); // Replace with your server URL
+    var response = await http.get(url);
+    setState(() {
+      trendData = jsonDecode(response.body)
+        .map<Map<String, dynamic>>((item) => {
+              'da': item['da'],
+              'codename': item['codename'],
+              'strategy': item['strategy'],
+              'rank': item['rank'],
+          })
+        .toList();
 
+      for (var item in trendData) {
+        trendStockList.add(item['codename']);
+      }
+    });
+  }
+
+  Future<void> fetchStockPrice() async {
+    var uri = Uri.parse("http://localhost:8080/price?start=$start&symbols=2330,2317,2454,3231");
+    var response = await http.get(uri);
+    setState(() {
+      trendStockPrice = jsonDecode(response.body)
+        .map<Map<String, dynamic>>((item) => {
+        'da': item['da'],
+        'codename': item['codename'],
+        'symbol': item['symbol'],
+        'industry': item['industry'],
+        'op': item['op'],
+        'hi': item['hi'],
+        'lo': item['lo'],
+        'cl': item['cl'],
+        })
+      .toList();
+    });
+    for (var item in trendStockPrice) {
+      if (!groupedTrendStockPrice.containsKey(item['symbol'])) {
+        groupedTrendStockPrice[item['symbol']] = [];
+      }
+      groupedTrendStockPrice[item['symbol']]!.add(item);
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,9 +97,9 @@ class Trend extends StatelessWidget {
           ),
         ),
         child: ListView.builder(
-          itemCount: items.length,
+          itemCount: trendStockList.length,
           itemBuilder: (context, index) {
-            final item = items[index];
+            final symbol = trendStockList[index];
             return Card(
               child: LayoutBuilder(
                 builder: (context, constraints) {
@@ -62,14 +110,14 @@ class Trend extends StatelessWidget {
                   double chartHeight =
                       listTileHeight * 1.0; // 60% of ListTile's height
 
-                  return Container(
+                  return SizedBox(
                     height: listTileHeight,
                     child: InkWell(
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => DetailPage(),
+                            builder: (context) => DetailPage(symbol: symbol,),
                           ),
                         );
                       },
@@ -78,9 +126,22 @@ class Trend extends StatelessWidget {
                         title: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            IntradayTitle(item: item),
-                            IntradayChart(item: item, chartHeight: chartHeight, chartWidth: chartWidth),
-                            IntradayTrailing(item: item),
+                            Expanded(
+                              flex: 1, // Adjust flex values as per your design
+                              child: IntradayTitle(
+                                item: trendStockFundamentals[symbol] ?? const stockFundamentals('2330', '2330', '2330'),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 6, // Adjust flex values as per your design
+                              child: IntradayChart(
+                                symbol: symbol,
+                                groupedTrendStockPrice: groupedTrendStockPrice,
+                                chartHeight: chartHeight,
+                                chartWidth: chartWidth,
+                              ),
+                            ), 
+                            IntradayTrailing(item: trendStockFundamentals[symbol] ?? const stockFundamentals('2330', '2330', '2330')),
                           ],
                         ),
                       ),
@@ -104,7 +165,7 @@ class ChartData {
 }
 
 class IntradayTitle extends StatelessWidget {
-  final TodoItem item;
+  final stockFundamentals item;
 
   const IntradayTitle({super.key, required this.item});
 
@@ -113,37 +174,38 @@ class IntradayTitle extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(item.title),
-        Text(item.description),
+        Text(item.symbol),
+        Text(item.codename),
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Text(item.classification,
+            Text(item.industry,
                 style: const TextStyle(
                   fontSize: 10,
                   color: Colors.red,
                 )),
-            Text(item.volume.toString(),
-                style: const TextStyle(
-                  fontSize: 10,
-                  color: Colors.blue,
-                )),
-            Text(
-              item.investOrder,
-              style: const TextStyle(fontSize: 10, color: Colors.green),
-            ),
+//             Text(item.volume.toString(),
+//                 style: const TextStyle(
+//                   fontSize: 10,
+//                   color: Colors.blue,
+//                 )),
+//             Text(
+//               item.investOrder,
+//               style: const TextStyle(fontSize: 10, color: Colors.green),
+//             ),
           ],
         ),
       ],
     );
   }
 }
-
 class IntradayChart extends StatelessWidget {
-  final TodoItem item;
+  final String symbol;
   final double chartWidth;
   final double chartHeight;
-  const IntradayChart({super.key, required this.item, required this.chartHeight, required this.chartWidth});
+  final Map<String, dynamic> groupedTrendStockPrice;
+
+  IntradayChart({Key? key, required this.symbol, required this.groupedTrendStockPrice, required this.chartHeight, required this.chartWidth}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +216,7 @@ class IntradayChart extends StatelessWidget {
         primaryXAxis: CategoryAxis(),
         series: <CartesianSeries>[
           LineSeries<ChartData, String>(
-            dataSource: getChartData(),
+            dataSource: getChartData(symbol, groupedTrendStockPrice),
             xValueMapper: (ChartData data, _) => data.x,
             yValueMapper: (ChartData data, _) => data.y,
           ),
@@ -162,30 +224,67 @@ class IntradayChart extends StatelessWidget {
       ),
     );
   }
-    // Sample data for the chart
-  List<ChartData> getChartData() {
-    return [
-      ChartData('Jan', 35),
-      ChartData('Feb', 28),
-      ChartData('Mar', 34),
-      ChartData('Apr', 32),
-      ChartData('May', 40),
-    ];
+
+  List<ChartData> getChartData(String symbol, Map<String, dynamic> groupedTrendStockPrice) {
+    List<ChartData> chartData = [];
+
+    // Check if groupedTrendStockPrice[symbol] is not null before iterating
+    if (groupedTrendStockPrice[symbol] != null) {
+      for (var item in groupedTrendStockPrice[symbol]!) {
+        if (item != null) {
+          chartData.add(ChartData(item['da'], item['cl']));
+        }
+      }
+    }
+
+    return chartData;
   }
 }
-
 class IntradayTrailing extends StatelessWidget {
-  final TodoItem item;
+  final stockFundamentals item;
   const IntradayTrailing({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-      Text(item.closePrice.toString()),
-      Text('${item.percentage.toString()}%'),
+      Text(item.codename),
+      Text(item.symbol),
       ],
     );
   }
 }
 
+class stockFundamentals {
+  final String symbol;
+  final String codename;
+  final String industry;
+
+  const stockFundamentals(
+    this.symbol, 
+    this.codename, 
+    this.industry,);
+}
+
+
+class StockPrice {
+  final DateTime date;
+  final String codename;
+  final String symbol;
+  final String industry;
+  final double open;
+  final double high;
+  final double low;
+  final double close;
+
+  StockPrice({
+    required this.date,
+    required this.codename,
+    required this.symbol,
+    required this.industry,
+    required this.open,
+    required this.high,
+    required this.low,
+    required this.close,
+  });
+}

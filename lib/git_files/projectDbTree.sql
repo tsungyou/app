@@ -28,8 +28,8 @@ PGPASSWORD='Buddyrich134' psql -U jimmy -d user_validation -- not commanded for 
         - PRIMARY KEY (user_email)
         ...
 
-- flutter_test1
-    - daily
+- daily
+    - daily_price
         - da
         - codename
         - symbol
@@ -42,15 +42,25 @@ PGPASSWORD='Buddyrich134' psql -U jimmy -d user_validation -- not commanded for 
         
     - ...
     - ...
-
+- fundamentals
+    - tw
+        - symbol
+        - industry
+        -
+- strategy
+    - Trend
+        - da
+        - (time)
+        - ticker
+    - Intraday
 
 
 final dbServiceUserValidation = DatabaseService(
     host: 'localhost',
     port: 5432,
     databaseName: 'user_validation',
-    username: 'jimmy',
-    password: 'Buddyrich134',
+    username: 'mini',
+    password: '',
 );
 CREATE DATABASE user_validation;
 =================================
@@ -74,7 +84,16 @@ CREATE TABLE user_information (
 INSERT INTO user_information (username, user_email, user_password, user_phone_number) VALUES ('test', 'test', 'test', 'test');
 select * from user_information limit 110;
 =================================
-CREATE TABLE daily (
+CREATE TABLE purchase (
+    user_email VARCHAR(100) NOT NULL,
+    strategy_1 BOOLEAN DEFAULT FALSE,
+    purchase_date_strategy_1 DATE,
+    invalid_date_strategy_1 DATE DEFAULT (NOW() + INTERVAL '1 month'),
+    PRIMARY KEY (user_email)
+);
+=================================
+CREATE DATABASE daily
+CREATE TABLE daily_price (
     da DATE,
     codename VARCHAR(100),
     symbol VARCHAR(100),
@@ -84,15 +103,33 @@ CREATE TABLE daily (
     lo FLOAT,
     cl FLOAT
 );
+=================================
+CREATE DATABASE strategy;
 
-
-
-CREATE TABLE purchase (
-    user_email VARCHAR(100) NOT NULL,
-    strategy_1 BOOLEAN DEFAULT FALSE,
-    purchase_date_strategy_1 DATE,
-    invalid_date_strategy_1 DATE DEFAULT (NOW() + INTERVAL '1 month'),
-    PRIMARY KEY (user_email)
+CREATE TABLE trend (
+    da DATE,
+    codename VARCHAR(100),
+    strategy VARCHAR(100),
+    rank FLOAT
 );
 
+-- ==========
+INSERT INTO trend (da, codename, strategy, rank) VALUES ('2024-01-01', '2330', 'trend', 1);
+INSERT INTO trend (da, codename, strategy, rank) VALUES ('2024-01-01', '2317', 'trend', 2);
+INSERT INTO trend (da, codename, strategy, rank) VALUES ('2024-01-01', '2454', 'trend', 3);
+INSERT INTO trend (da, codename, strategy, rank) VALUES ('2024-01-01', '3231', 'trend', 4);
+SELECT * FROM trend limit 10;
+-- ==========
+=================================
+CREATE DATABASE fundamentals;
 
+CREATE TABLE tw (
+    symbol VARCHAR(100),
+    codename VARCHAR(100),
+    industry VARCHAR(100)
+);
+
+INSERT INTO tw (symbol, codename, industry) VALUES ('2330', 'symbol', 'industry');
+INSERT INTO tw (symbol, codename, industry) VALUES ('2317', 'symbol', 'industry');
+INSERT INTO tw (symbol, codename, industry) VALUES ('2454', 'symbol', 'industry');
+INSERT INTO tw (symbol, codename, industry) VALUES ('3231', 'symbol', 'industry');    
