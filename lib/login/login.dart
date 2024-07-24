@@ -3,7 +3,7 @@ import 'package:postgres/postgres.dart';
 import 'package:test_empty_1/home/home.dart';
 import 'package:test_empty_1/login/register.dart';
 import 'package:test_empty_1/services/database_services.dart';
-
+import 'package:http/http.dart' as http;
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -16,29 +16,29 @@ class LoginPageState extends State<Login> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-
   void _login() async {
     final loginEmail = _emailController.text;
     final loginPassword = _passwordController.text;
 
     // Add your login logic here
     if (loginEmail.isNotEmpty && loginPassword.isNotEmpty) {
-      final conn = DatabaseService(
-        host: 'localhost', 
-        port: 5432, 
-        databaseName: 'user_validation', 
-        username: 'test', 
-        password: ''
-      );
-      final user = await conn.checkUser(loginEmail, loginPassword);
-      if(user != null){
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const Home()),
-        );
-      conn.closeConnection();
-      } else { _showErrorDialog("email and password combination doesn't exist");}
-    } else { _showErrorDialog('Please enter LoginUsername and LoginPassword');}
+      try {
+        var uri = Uri.parse('http://localhost:8080/users?email=$loginEmail&password=$loginPassword');
+        var response = await http.get(uri);
+        if (response.statusCode == 200) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const Home()),
+          );
+        } else { 
+        _showErrorDialog("email and password combination doesn't exist");
+        }
+      } catch (e) {
+        print('Error fetching data: $e');
+      }
+    } else {
+      _showErrorDialog('Please enter LoginUsername and LoginPassword');
+    }
   }
   void _register() {
     Navigator.push(
