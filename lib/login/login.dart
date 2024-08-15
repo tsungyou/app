@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:test_empty_1/home/home.dart';
 import 'package:test_empty_1/login/register.dart';
 import 'package:http/http.dart' as http;
-
+import 'dart:convert'; // For jsonEncode
 class Login extends StatefulWidget {
   const Login({super.key});
 
@@ -21,8 +21,13 @@ class LoginPageState extends State<Login> {
     // Add your login logic here
     if (loginEmail.isNotEmpty && loginPassword.isNotEmpty) {
       try {
-        var uri = Uri.parse('http://localhost:8080/login?email=$loginEmail&password=$loginPassword');
-        var response = await http.get(uri);
+        var uri = Uri.parse('http://localhost:8000/login?email=$loginEmail&pwd=$loginPassword');
+        var response = await http.get(
+          uri,
+          headers: {
+          'Content-Type': 'application/json', // Set content type to JSON
+          },
+        );
         if (response.statusCode == 200) {
           Navigator.push(
             context,

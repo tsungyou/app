@@ -3,84 +3,83 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:test_empty_1/stocks/detailExample.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
-class Trend extends StatefulWidget {
-  const Trend({super.key});
+class PE extends StatefulWidget {
+  const PE({super.key});
   
   @override
-  State<Trend> createState() => _TrendState();
+  State<PE> createState() => _PEState();
 }
 
-class _TrendState extends State<Trend> {
+class _PEState extends State<PE> {
   final String start = DateTime.now().subtract(const Duration(days: 90)).toString().substring(0, 10);
   late List<Map<String, dynamic>> trendData;
   late List<Map<String, dynamic>> trendStockPrice;
   late Map<String, stockFundamentals> trendStockFundamentals = {};
   Map<String, dynamic> groupedTrendStockPrice = {};
   List<String> trendStockList = [];
+
   @override
   void initState() {
     super.initState();
     fetchStrategyTrend();
-    fetchStockPrice();
-    fetchFundamentals();
-  }
-  Future<void> fetchFundamentals() async {
-    var url = Uri.parse('http://localhost:8080/fundamentals?symbols=2330,2317,2454,3231');
-    var response = await http.get(url);
-    setState(() {
-      trendStockFundamentals = jsonDecode(response.body)
-        .map<String, stockFundamentals>((item) => {
-              stockFundamentals(item['code'], item['codename'], item['industry']),
-          })
-        .toList();
-    });
-    print(trendStockFundamentals);
+    // fetchStockPrice(); // Moved to fetch after trendData is populated
   }
 
   Future<void> fetchStrategyTrend() async {
-    var url = Uri.parse('http://localhost:8080/trend'); // Replace with your server URL
+    var url = Uri.parse('http://localhost:8000/pe'); // Replace with your server URL
     var response = await http.get(url);
-    setState(() {
-      trendData = jsonDecode(response.body)
-        .map<Map<String, dynamic>>((item) => {
+    if (response.statusCode == 200) {
+      final List<dynamic> responseData = jsonDecode(response.body);
+      setState(() {
+        trendData = responseData.map<Map<String, dynamic>>((item) => {
               'da': item['da'],
-              'codename': item['codename'],
-              'strategy': item['strategy'],
-              'rank': item['rank'],
-          })
-        .toList();
-
-      for (var item in trendData) {
-        trendStockList.add(item['codename']);
-      }
-    });
+              'code': item['code'],
+              'cl': item['cl'],
+            }).toList();
+        for (var item in trendData) {
+          trendStockList.add(item['code']);
+        }
+      });
+      // Fetch stock price after trendStockList is populated
+      fetchStockPrice();
+    } else {
+      print('Failed to load strategy trend data');
+    }
   }
 
   Future<void> fetchStockPrice() async {
-    var uri = Uri.parse("http://localhost:8080/price?start=$start&symbols=2330,2317,2454,3231");
-    var response = await http.get(uri);
-    setState(() {
-      trendStockPrice = jsonDecode(response.body)
-        .map<Map<String, dynamic>>((item) => {
-        'da': item['da'],
-        'codename': item['codename'],
-        'code': item['code'],
-        'industry': item['industry'],
-        'op': item['op'],
-        'hi': item['hi'],
-        'lo': item['lo'],
-        'cl': item['cl'],
-        })
-      .toList();
+    if (trendStockList.isEmpty) return; // Early exit if list is empty
+    final symbols = trendStockList.join(',');
+    print('Symbols for stock price request: $symbols');
+    final uri = Uri.parse('http://localhost:8000/price').replace(queryParameters: {
+      'codes': symbols,
     });
-    for (var item in trendStockPrice) {
-      if (!groupedTrendStockPrice.containsKey(item['code'])) {
-        groupedTrendStockPrice[item['code']] = [];
-      }
-      groupedTrendStockPrice[item['code']]!.add(item);
+    var response = await http.get(uri);
+    if (response.statusCode == 200) {
+      final List<dynamic> responseData = jsonDecode(response.body);
+      setState(() {
+        trendStockPrice = responseData.map<Map<String, dynamic>>((item) => {
+          'da': item['da'],
+          'code': item['code'],
+          'op': item['op'],
+          'hi': item['hi'],
+          'lo': item['lo'],
+          'cl': item['cl'],
+        }).toList();
+        for (var item in trendStockPrice) {
+          if (!groupedTrendStockPrice.containsKey(item['code'])) {
+            groupedTrendStockPrice[item['code']] = [];
+          }
+          groupedTrendStockPrice[item['code']]!.add(item);
+        }
+      });
+    } else {
+      print('Failed to load stock price data');
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,7 +108,6 @@ class _TrendState extends State<Trend> {
                       constraints.maxWidth * 0.5; // 50% of ListTile's width
                   double chartHeight =
                       listTileHeight * 1.0; // 60% of ListTile's height
-
                   return SizedBox(
                     height: listTileHeight,
                     child: InkWell(
@@ -129,7 +127,7 @@ class _TrendState extends State<Trend> {
                             Expanded(
                               flex: 1, // Adjust flex values as per your design
                               child: IntradayTitle(
-                                item: trendStockFundamentals[code] ?? const stockFundamentals('2330', '2330', '2330'),
+                                item: trendStockFundamentals[code] ?? stockFundamentals(DateFormat('y/M/d').format(DateTime.parse(trendData[index]['da'])), code, trendData[index]['cl'].toString()),
                               ),
                             ),
                             Expanded(
@@ -174,8 +172,18 @@ class IntradayTitle extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(item.code),
-        Text(item.codename),
+        Text(
+          item.codename,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          item.code,
+          style: const TextStyle(
+            fontSize: 10,
+          ),
+        ),
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
@@ -183,22 +191,14 @@ class IntradayTitle extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 10,
                   color: Colors.red,
-                )),
-//             Text(item.volume.toString(),
-//                 style: const TextStyle(
-//                   fontSize: 10,
-//                   color: Colors.blue,
-//                 )),
-//             Text(
-//               item.investOrder,
-//               style: const TextStyle(fontSize: 10, color: Colors.green),
-//             ),
+              )),
           ],
         ),
       ],
     );
   }
 }
+
 class IntradayChart extends StatelessWidget {
   final String code;
   final double chartWidth;
@@ -240,6 +240,7 @@ class IntradayChart extends StatelessWidget {
     return chartData;
   }
 }
+
 class IntradayTrailing extends StatelessWidget {
   final stockFundamentals item;
   const IntradayTrailing({super.key, required this.item});
@@ -262,29 +263,7 @@ class stockFundamentals {
 
   const stockFundamentals(
     this.code, 
-    this.codename, 
-    this.industry,);
-}
-
-
-class StockPrice {
-  final DateTime date;
-  final String codename;
-  final String code;
-  final String industry;
-  final double open;
-  final double high;
-  final double low;
-  final double close;
-
-  StockPrice({
-    required this.date,
-    required this.codename,
-    required this.code,
-    required this.industry,
-    required this.open,
-    required this.high,
-    required this.low,
-    required this.close,
-  });
+    this.codename,
+    this.industry,
+  );
 }

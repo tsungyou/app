@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '/strategies/buy_hold.dart';
+import '/strategies/PE.dart';
 import '/strategies/intraday.dart';
 import '/strategies/trend.dart';
+import '/stocks/detailedRobinhood.dart';
 
 class Home extends StatelessWidget {
   const Home({super.key});
@@ -94,7 +95,7 @@ class Home extends StatelessWidget {
                 // TabBar
                 const TabBar(
                   tabs: [
-                    Tab(icon: Icon(Icons.apps), text: 'BuyHold'),
+                    Tab(icon: Icon(Icons.apps), text: 'PE'),
                     Tab(icon: Icon(Icons.leaderboard), text: 'Intraday'),
                     Tab(icon: Icon(Icons.person), text: 'Trend'),
                   ],
@@ -105,7 +106,7 @@ class Home extends StatelessWidget {
         ),
         body: const TabBarView(
           children: [
-            BuyHold(),
+            PE(),
             Intraday(),
             Trend(),
           ],
