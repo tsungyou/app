@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:test_empty_1/config.dart';
   
 class DetailPage extends StatefulWidget {
   final String code;
@@ -23,13 +24,13 @@ class _DetailPage extends State<DetailPage> {
 
   Future<void> fetchSingleStock(String code, Timeframe timeframe) async {
     if (timeframe == Timeframe.oneDay || timeframe == Timeframe.oneWeek){
-      uri = Uri.parse("http://localhost:8000/detailed_price").replace(queryParameters: {
+      uri = Uri.parse("${Config.baseUrl}/detailed_price").replace(queryParameters: {
         'codes': code,
         'day': getDaysForTimeframe(timeframe).toString(),
       });
     }
     else{
-      uri = Uri.parse("http://localhost:8000/detailed_price").replace(queryParameters: {
+      uri = Uri.parse("${Config.baseUrl}/detailed_price").replace(queryParameters: {
         'codes': code,
         'day': getDaysForTimeframe(timeframe).toString(),
       });

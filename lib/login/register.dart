@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:test_empty_1/login/login.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert'; // For jsonEncode
+import 'package:test_empty_1/config.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -45,7 +46,7 @@ class RegisterPageState extends State<Register> {
       //   return;
       // }
 
-      var uri = Uri.parse('http://localhost:8000/register');
+      var uri = Uri.parse('${Config.baseUrl}/register');
       var response = await http.post(
         uri,
         headers: {'Content-Type': 'application/json'},

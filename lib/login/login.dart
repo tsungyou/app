@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:test_empty_1/home/home.dart';
 import 'package:test_empty_1/login/register.dart';
 import 'package:http/http.dart' as http;
+import 'package:test_empty_1/config.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -20,7 +21,7 @@ class LoginPageState extends State<Login> {
 
     if (loginEmail.isNotEmpty && loginPassword.isNotEmpty) {
       try {
-        var uri = Uri.parse('http://localhost:8000/login?email=$loginEmail&pwd=$loginPassword');
+        var uri = Uri.parse('${Config.baseUrl}/login?email=$loginEmail&pwd=$loginPassword');
         var response = await http.get(
           uri,
           headers: {'Content-Type': 'application/json'},

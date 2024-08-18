@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:test_empty_1/login/login.dart';
 import 'package:http/http.dart' as http;
+import 'package:test_empty_1/config.dart';
+
 import 'dart:convert'; // For jsonEncode
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -32,7 +34,7 @@ class RegisterPageState extends State<Register> {
       // else if (!emailRegExp.hasMatch(email)) { _showErrorDialog('Email must have @!'); return;}
       // else if (!passwordRegExp.hasMatch(password)) {_showErrorDialog('Password must have at least one uppercase, one lowercase and one alphabet'); return;}
       
-      var uri = Uri.parse('http://localhost:8000/register');
+      var uri = Uri.parse('${Config.baseUrl}/register');
       var response = await http.post(
         uri,  
         headers: {

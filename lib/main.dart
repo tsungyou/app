@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:test_empty_1/login/login.dart';
 import 'package:test_empty_1/home/home.dart';
-// import 'package:test_empty_1/strategies/trend.dart';
-// import 'package:test_empty_1/strategies/buy_hold.dart';
 void main() {
   runApp(const MainApp());
 }

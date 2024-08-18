@@ -4,7 +4,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:test_empty_1/stocks/detailExample.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-
+import 'package:test_empty_1/config.dart';
 class PE extends StatefulWidget {
   const PE({super.key});
 
@@ -16,7 +16,7 @@ class _PEState extends State<PE> {
   final String start = DateTime.now().subtract(const Duration(days: 90)).toString().substring(0, 10);
   late List<Map<String, dynamic>> trendData;
   late List<Map<String, dynamic>> trendStockPrice;
-  late Map<String, stockFundamentals> trendStockFundamentals = {};
+  late Map<String, StockFundamentals> trendStockFundamentals = {};
   Map<String, dynamic> groupedTrendStockPrice = {};
   List<String> trendStockList = [];
 
@@ -27,7 +27,7 @@ class _PEState extends State<PE> {
   }
 
   Future<void> fetchStrategyTrend() async {
-    var url = Uri.parse('http://localhost:8000/pe'); // Replace with your server URL
+    var url = Uri.parse('${Config.baseUrl}/pe'); // Replace with your server URL
     var response = await http.get(url);
     if (response.statusCode == 200) {
       final List<dynamic> responseData = jsonDecode(response.body);
@@ -50,7 +50,7 @@ class _PEState extends State<PE> {
   Future<void> fetchStockPrice() async {
     if (trendStockList.isEmpty) return;
     final symbols = trendStockList.join(',');
-    final uri = Uri.parse('http://localhost:8000/price').replace(queryParameters: {
+    final uri = Uri.parse('${Config.baseUrl}/price').replace(queryParameters: {
       'codes': symbols,
     });
     var response = await http.get(uri);
@@ -125,7 +125,7 @@ class _PEState extends State<PE> {
                             Expanded(
                               flex: 1,
                               child: IntradayTitle(
-                                item: trendStockFundamentals[code] ?? stockFundamentals(
+                                item: trendStockFundamentals[code] ?? StockFundamentals(
                                     DateFormat('y/M/d').format(DateTime.parse(trendData[index]['da'])),
                                     code,
                                     trendData[index]['cl'].toString()),
@@ -143,7 +143,7 @@ class _PEState extends State<PE> {
                             Expanded(
                               flex: 1,
                               child: IntradayTrailing(
-                                item: trendStockFundamentals[code] ?? const stockFundamentals('2330', '2330', '2330'),
+                                item: trendStockFundamentals[code] ?? const StockFundamentals('2330', '2330', '2330'),
                               ),
                             ),
                           ],
@@ -169,7 +169,7 @@ class ChartData {
 }
 
 class IntradayTitle extends StatelessWidget {
-  final stockFundamentals item;
+  final StockFundamentals item;
 
   const IntradayTitle({super.key, required this.item});
 
@@ -225,29 +225,44 @@ class IntradayChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    List<ChartData> chartData = getChartData(code, groupedTrendStockPrice);
+    double highest = double.negativeInfinity;
+    double lowest = double.infinity;
+    for (var data in chartData) {
+      if (data.y > highest) {
+        highest = data.y;
+      }
+      if (data.y < lowest) {
+        lowest = data.y;
+      }
+    }
+    // double highest = chartData.map((data) => data.y).reduce((a, b) => a > b ? a : b);
+    // double lowest = chartData.map((data) => data.y).reduce((a, b) => a < b ? a : b);
+
+    double yAxisPadding = (highest - lowest) * 0.1;
+    double yAxisMin = lowest - yAxisPadding;
+    double yAxisMax = highest + yAxisPadding;
     return SizedBox(
       width: chartWidth,
       height: chartHeight,
       child: SfCartesianChart(
         primaryXAxis: const CategoryAxis(
-          majorGridLines: MajorGridLines(width: 0),
-          axisLine: AxisLine(width: 0),
-          axisBorderType: AxisBorderType.withoutTopAndBottom,
         ),
-        primaryYAxis: const NumericAxis(
-          majorGridLines: MajorGridLines(width: 0),
-          axisLine: AxisLine(width: 0),
+        primaryYAxis: NumericAxis(
+          minimum: yAxisMin,
+          maximum: yAxisMax,
         ),
         series: <CartesianSeries>[
           LineSeries<ChartData, String>(
-            dataSource: getChartData(code, groupedTrendStockPrice),
+            dataSource: chartData,
             xValueMapper: (ChartData data, _) => data.x,
             yValueMapper: (ChartData data, _) => data.y,
             color: Colors.teal,
             width: 1,
           ),
         ],
-        crosshairBehavior: CrosshairBehavior(enable: true,),
+        // crosshairBehavior: CrosshairBehavior(enable: true,),
+        trackballBehavior: TrackballBehavior(enable: true),
         // zoomPanBehavior: ZoomPanBehavior(enableMouseWheelZooming: true,),
         // tooltipBehavior: TooltipBehavior(enable: true),
       ),
@@ -266,7 +281,7 @@ class IntradayChart extends StatelessWidget {
 }
 
 class IntradayTrailing extends StatelessWidget {
-  final stockFundamentals item;
+  final StockFundamentals item;
   const IntradayTrailing({super.key, required this.item});
 
   @override
@@ -276,7 +291,7 @@ class IntradayTrailing extends StatelessWidget {
       children: [
         Text(
           item.codename,
-          style: TextStyle(
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 14,
             color: Colors.teal,
@@ -294,12 +309,12 @@ class IntradayTrailing extends StatelessWidget {
   }
 }
 
-class stockFundamentals {
+class StockFundamentals {
   final String code;
   final String codename;
   final String industry;
 
-  const stockFundamentals(
+  const StockFundamentals(
     this.code, 
     this.codename,
     this.industry,

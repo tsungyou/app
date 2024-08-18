@@ -36,7 +36,7 @@
 //     fetchStockData();
 //   }
 //   Future<void> fetchStockData() async {
-//     var url = Uri.parse('http://localhost:8000/detailed_price').replace(queryParameters: {
+//     var url = Uri.parse('${Config.baseUrl}/detailed_price').replace(queryParameters: {
 //       'codes': widget.code,
 //     });
 //     var response = await http.get(url);

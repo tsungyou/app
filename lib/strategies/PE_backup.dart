@@ -4,7 +4,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:test_empty_1/stocks/detailExample.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-
+import 'package:test_empty_1/config.dart';
 class PE extends StatefulWidget {
   const PE({super.key});
   
@@ -28,7 +28,7 @@ class _PEState extends State<PE> {
   }
 
   Future<void> fetchStrategyTrend() async {
-    var url = Uri.parse('http://localhost:8000/pe'); // Replace with your server URL
+    var url = Uri.parse('${Config.baseUrl}/pe'); // Replace with your server URL
     var response = await http.get(url);
     if (response.statusCode == 200) {
       final List<dynamic> responseData = jsonDecode(response.body);
@@ -53,7 +53,7 @@ class _PEState extends State<PE> {
     if (trendStockList.isEmpty) return; // Early exit if list is empty
     final symbols = trendStockList.join(',');
     print('Symbols for stock price request: $symbols');
-    final uri = Uri.parse('http://localhost:8000/price').replace(queryParameters: {
+    final uri = Uri.parse('${Config.baseUrl}/price').replace(queryParameters: {
       'codes': symbols,
     });
     var response = await http.get(uri);
