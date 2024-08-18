@@ -70,7 +70,7 @@ class LoginPageState extends State<Login> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login/Register'),
+        title: const Text('登入'),
         centerTitle: true,
         backgroundColor: Colors.teal, // Change app bar color
       ),
@@ -80,7 +80,7 @@ class LoginPageState extends State<Login> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Icon(
+              const Icon(
                 Icons.login, // Add an icon
                 size: 100,
                 color: Colors.teal,
@@ -88,7 +88,7 @@ class LoginPageState extends State<Login> {
               const SizedBox(height: 20.0),
               TextField(
                 controller: _emailController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   prefixIcon: Icon(Icons.email),
                   labelText: 'Username',
                   border: OutlineInputBorder(),
@@ -103,7 +103,7 @@ class LoginPageState extends State<Login> {
               const SizedBox(height: 16.0),
               TextField(
                 controller: _passwordController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   prefixIcon: Icon(Icons.lock),
                   labelText: 'Password',
                   border: OutlineInputBorder(),
@@ -122,12 +122,12 @@ class LoginPageState extends State<Login> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal, // Background color
                   foregroundColor: Colors.white, // Text color
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15), // Padding
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15), // Padding
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30), // Rounded corners
                   ),
                 ),
-                child: const Text('Login'),
+                child: const Text('登入'),
               ),
               const SizedBox(height: 10.0),
               ElevatedButton(
@@ -140,7 +140,7 @@ class LoginPageState extends State<Login> {
                     borderRadius: BorderRadius.circular(30), // Rounded corners
                   ),
                 ),
-                child: const Text('Register'),
+                child: const Text('註冊'),
               ),
             ],
           ),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:test_empty_1/login/login.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert'; // For jsonEncode
-
 class Register extends StatefulWidget {
   const Register({super.key});
 
@@ -26,29 +26,18 @@ class RegisterPageState extends State<Register> {
 
     final emailRegExp = RegExp(r'^[^@]+@[^@]+$');
     final passwordRegExp = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$');
-
-    if (username.isNotEmpty &&
-        password.isNotEmpty &&
-        reenterPassword.isNotEmpty &&
-        phoneNumber.isNotEmpty) {
-      if (password != reenterPassword) {
-        _showErrorDialog('Passwords do not match');
-        return;
-      } 
-      // Uncomment and adjust validation as needed
-      // else if (!emailRegExp.hasMatch(email)) {
-      //   _showErrorDialog('Email must have @!');
-      //   return;
-      // } 
-      // else if (!passwordRegExp.hasMatch(password)) {
-      //   _showErrorDialog('Password must have at least one uppercase, one lowercase, and one digit');
-      //   return;
-      // }
-
+    // Login logic
+    if (username.isNotEmpty && password.isNotEmpty && reenterPassword.isNotEmpty && phoneNumber.isNotEmpty) {
+      if (password != reenterPassword) { _showErrorDialog('Passwords do not match'); return;} 
+      // else if (!emailRegExp.hasMatch(email)) { _showErrorDialog('Email must have @!'); return;}
+      // else if (!passwordRegExp.hasMatch(password)) {_showErrorDialog('Password must have at least one uppercase, one lowercase and one alphabet'); return;}
+      
       var uri = Uri.parse('http://localhost:8000/register');
       var response = await http.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
+        uri,  
+        headers: {
+          'Content-Type': 'application/json', // Set content type to JSON
+        },
         body: jsonEncode({
           'username': username,
           'email': email,
@@ -57,10 +46,8 @@ class RegisterPageState extends State<Register> {
         }),
       );
       if (response.statusCode == 200) {
-        print("User information created successfully");
+        print("create user information successfully, return;");
         _showSuccessDialog();
-      } else {
-        _showErrorDialog('Failed to register. Please try again.');
       }
     } else {
       _showErrorDialog('Please check missing input');
@@ -72,7 +59,7 @@ class RegisterPageState extends State<Register> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Register Successful'),
-        content: const Text('Redirecting to Login Page...'),
+        content: const Text('Redirect to Login Page...'),
         actions: <Widget>[
           TextButton(
             onPressed: () {
@@ -105,49 +92,31 @@ class RegisterPageState extends State<Register> {
       ),
     );
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Register'),
-        centerTitle: true,
-        backgroundColor: Colors.teal,
+        title: const Text('Register/Register'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(
-                Icons.person_add,
-                size: 100,
-                color: Colors.teal,
-              ),
-              const SizedBox(height: 20.0),
-              RegistrationForm(
-                usernameController: _usernameController,
-                passwordController: _passwordController,
-                reenterPasswordController: _reenterPasswordController,
-                phoneNumberController: _phoneNumberController,
-                emailController: _emailController,
-              ),
-              const SizedBox(height: 20.0),
-              ElevatedButton(
-                onPressed: _register,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                child: const Text('Register'),
-              ),
-            ],
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Icon(Icons.catching_pokemon),
+            RegistrationForm(
+              usernameController: _usernameController,
+              passwordController: _passwordController,
+              reenterPasswordController: _reenterPasswordController,
+              phoneNumberController: _phoneNumberController,
+              emailController: _emailController,
+            ),
+            const SizedBox(height: 16.0), // Add space between form and button
+            ElevatedButton(
+              onPressed: _register, // Pass the method without parentheses
+              child: const Text('Register'),
+            ),
+          ],
         ),
       ),
     );
@@ -157,9 +126,6 @@ class RegisterPageState extends State<Register> {
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
-    _reenterPasswordController.dispose();
-    _phoneNumberController.dispose();
-    _emailController.dispose();
     super.dispose();
   }
 }
@@ -181,17 +147,7 @@ class CustomTextField extends StatelessWidget {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
-        prefixIcon: labelText == 'Password' || labelText == 'Reenter Password'
-            ? Icon(Icons.lock)
-            : Icon(Icons.person),
         labelText: labelText,
-        border: OutlineInputBorder(),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.teal, width: 2.0),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey, width: 1.0),
-        ),
       ),
       obscureText: obscureText,
     );
@@ -204,7 +160,6 @@ class RegistrationForm extends StatelessWidget {
   final TextEditingController reenterPasswordController;
   final TextEditingController phoneNumberController;
   final TextEditingController emailController;
-
   const RegistrationForm({
     required this.usernameController,
     required this.passwordController,
@@ -217,7 +172,7 @@ class RegistrationForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         CustomTextField(
           controller: usernameController,
@@ -228,23 +183,21 @@ class RegistrationForm extends StatelessWidget {
           controller: emailController,
           labelText: 'Email',
         ),
-        const SizedBox(height: 16.0),
         CustomTextField(
           controller: passwordController,
           labelText: 'Password',
-          obscureText: true,
         ),
         const SizedBox(height: 16.0),
         CustomTextField(
           controller: reenterPasswordController,
           labelText: 'Reenter Password',
-          obscureText: true,
         ),
         const SizedBox(height: 16.0),
         CustomTextField(
           controller: phoneNumberController,
           labelText: 'Phone Number',
         ),
+        const SizedBox(height: 16.0),
       ],
     );
   }

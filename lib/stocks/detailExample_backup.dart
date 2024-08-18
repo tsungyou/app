@@ -18,7 +18,7 @@ class _DetailPage extends State<DetailPage> {
   @override
   void initState() {
     super.initState();
-    fetchSingleStock(widget.code, Timeframe.sixMonths);
+    fetchSingleStock(widget.code, Timeframe.threeMonths);
   }
 
   Future<void> fetchSingleStock(String code, Timeframe timeframe) async {
@@ -66,7 +66,7 @@ class _DetailPage extends State<DetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.code),
+        title: const Text("Individual Stock Detail Page"),
       ),
       body: stockData == null
         ? const Center(child: CircularProgressIndicator())
@@ -75,7 +75,16 @@ class _DetailPage extends State<DetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            buildStockInfo(),
+            Container(
+              child: Column(
+                children: [
+                  Text('code'),
+                  Text('cname'),
+                  Text('daily return'),
+                  Text('stock price'),
+                ],
+              ),
+            ),
             SizedBox(
               height: 160,
               child: CustomPaint(
@@ -136,34 +145,8 @@ class _DetailPage extends State<DetailPage> {
       ),
     );
   }
-  Widget buildStockInfo() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          widget.code, 
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-          ),),
-        Text(
-          '台積電', 
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            
-          ),),
-        Text(
-          '${stockData?.close.toStringAsFixed(2)}(${stockData?.percentageChange.toStringAsFixed(2)}%)', 
-          style: TextStyle(
-            color: stockData!.percentageChange > 0 ? Colors.red : Colors.green,
-            fontSize: 10, 
-          ),
-        ),
-      ],
-    );
-  }
 }
+
 String _timeframeLabel(Timeframe timeframe) {
     switch (timeframe) {
       case Timeframe.oneDay:
@@ -181,7 +164,6 @@ String _timeframeLabel(Timeframe timeframe) {
       default:
         return timeframe.toString();
     }
-    
 }
 class StockCandleStickPainter extends CustomPainter {
 

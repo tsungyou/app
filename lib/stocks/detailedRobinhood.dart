@@ -5,7 +5,6 @@
 // import 'package:syncfusion_flutter_charts/charts.dart';
 // import 'package:http/http.dart' as http;
 
-
 // enum PriceChange {
 //   gain,
 //   loss,

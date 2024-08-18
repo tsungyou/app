@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 
 class PE extends StatefulWidget {
   const PE({super.key});
-
+  
   @override
   State<PE> createState() => _PEState();
 }
@@ -24,6 +24,7 @@ class _PEState extends State<PE> {
   void initState() {
     super.initState();
     fetchStrategyTrend();
+    // fetchStockPrice(); // Moved to fetch after trendData is populated
   }
 
   Future<void> fetchStrategyTrend() async {
@@ -41,6 +42,7 @@ class _PEState extends State<PE> {
           trendStockList.add(item['code']);
         }
       });
+      // Fetch stock price after trendStockList is populated
       fetchStockPrice();
     } else {
       print('Failed to load strategy trend data');
@@ -48,8 +50,9 @@ class _PEState extends State<PE> {
   }
 
   Future<void> fetchStockPrice() async {
-    if (trendStockList.isEmpty) return;
+    if (trendStockList.isEmpty) return; // Early exit if list is empty
     final symbols = trendStockList.join(',');
+    print('Symbols for stock price request: $symbols');
     final uri = Uri.parse('http://localhost:8000/price').replace(queryParameters: {
       'codes': symbols,
     });
@@ -85,10 +88,10 @@ class _PEState extends State<PE> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             colors: [
-              Colors.grey[200]!,
-              Colors.grey[400]!,
-              Colors.grey[600]!,
-              Colors.grey[800]!,
+              Colors.grey[400] ?? Colors.grey,
+              Colors.grey[800] ?? Colors.grey,
+              Colors.grey[200] ?? Colors.grey,
+              Colors.grey[800] ?? Colors.grey,
             ],
           ),
         ),
@@ -97,61 +100,52 @@ class _PEState extends State<PE> {
           itemBuilder: (context, index) {
             final code = trendStockList[index];
             return Card(
-              margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-              elevation: 5,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    double listTileHeight = 120.0; // Adjust height as needed
-                    double chartWidth = constraints.maxWidth * 0.5; // 50% of ListTile's width
-                    double chartHeight = listTileHeight * 0.9; // 60% of ListTile's height
-                    return SizedBox(
-                      height: listTileHeight,
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DetailPage(code: code),
-                            ),
-                          );
-                        },
-                        child: Row(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  // Set a fixed height for the ListTile
+                  double listTileHeight = 100.0; // Set your desired height
+                  double chartWidth =
+                      constraints.maxWidth * 0.5; // 50% of ListTile's width
+                  double chartHeight =
+                      listTileHeight * 1.0; // 60% of ListTile's height
+                  return SizedBox(
+                    height: listTileHeight,
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DetailPage(code: code,),
+                          ),
+                        );
+                      },
+                      child: ListTile(
+                        leading: const Icon(Icons.battery_1_bar_outlined),
+                        title: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Expanded(
-                              flex: 1,
+                              flex: 1, // Adjust flex values as per your design
                               child: IntradayTitle(
-                                item: trendStockFundamentals[code] ?? stockFundamentals(
-                                    DateFormat('y/M/d').format(DateTime.parse(trendData[index]['da'])),
-                                    code,
-                                    trendData[index]['cl'].toString()),
+                                item: trendStockFundamentals[code] ?? stockFundamentals(DateFormat('y/M/d').format(DateTime.parse(trendData[index]['da'])), code, trendData[index]['cl'].toString()),
                               ),
                             ),
                             Expanded(
-                              flex: 4,
+                              flex: 6, // Adjust flex values as per your design
                               child: IntradayChart(
                                 code: code,
                                 groupedTrendStockPrice: groupedTrendStockPrice,
                                 chartHeight: chartHeight,
                                 chartWidth: chartWidth,
                               ),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: IntradayTrailing(
-                                item: trendStockFundamentals[code] ?? const stockFundamentals('2330', '2330', '2330'),
-                              ),
-                            ),
+                            ), 
+                            IntradayTrailing(item: trendStockFundamentals[code] ?? const stockFundamentals('2330', '2330', '2330')),
                           ],
                         ),
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
             );
           },
@@ -182,32 +176,22 @@ class IntradayTitle extends StatelessWidget {
           item.codename,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 16,
-            color: Colors.teal,
           ),
         ),
         Text(
           item.code,
           style: const TextStyle(
-            fontSize: 14,
-            color: Colors.grey,
+            fontSize: 10,
           ),
         ),
-        const SizedBox(height: 4.0),
         Row(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Icon(
-              Icons.trending_up,
-              color: Colors.green[600],
-            ),
-            const SizedBox(width: 4.0),
-            Text(
-              item.industry,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.red,
-              ),
-            ),
+            Text(item.industry,
+                style: const TextStyle(
+                  fontSize: 10,
+                  color: Colors.red,
+              )),
           ],
         ),
       ],
@@ -229,38 +213,30 @@ class IntradayChart extends StatelessWidget {
       width: chartWidth,
       height: chartHeight,
       child: SfCartesianChart(
-        primaryXAxis: const CategoryAxis(
-          majorGridLines: MajorGridLines(width: 0),
-          axisLine: AxisLine(width: 0),
-          axisBorderType: AxisBorderType.withoutTopAndBottom,
-        ),
-        primaryYAxis: const NumericAxis(
-          majorGridLines: MajorGridLines(width: 0),
-          axisLine: AxisLine(width: 0),
-        ),
+        primaryXAxis: CategoryAxis(),
         series: <CartesianSeries>[
           LineSeries<ChartData, String>(
             dataSource: getChartData(code, groupedTrendStockPrice),
             xValueMapper: (ChartData data, _) => data.x,
             yValueMapper: (ChartData data, _) => data.y,
-            color: Colors.teal,
-            width: 1,
           ),
         ],
-        crosshairBehavior: CrosshairBehavior(enable: true,),
-        // zoomPanBehavior: ZoomPanBehavior(enableMouseWheelZooming: true,),
-        // tooltipBehavior: TooltipBehavior(enable: true),
       ),
     );
   }
 
   List<ChartData> getChartData(String code, Map<String, dynamic> groupedTrendStockPrice) {
     List<ChartData> chartData = [];
+
+    // Check if groupedTrendStockPrice[code] is not null before iterating
     if (groupedTrendStockPrice[code] != null) {
       for (var item in groupedTrendStockPrice[code]!) {
-        chartData.add(ChartData(item['da'], item['cl']));
+        if (item != null) {
+          chartData.add(ChartData(item['da'], item['cl']));
+        }
       }
     }
+
     return chartData;
   }
 }
@@ -272,23 +248,9 @@ class IntradayTrailing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Text(
-          item.codename,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-            color: Colors.teal,
-          ),
-        ),
-        Text(
-          item.code,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-          ),
-        ),
+      Text(item.codename),
+      Text(item.code),
       ],
     );
   }
