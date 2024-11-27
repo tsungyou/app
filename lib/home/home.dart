@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
+import '/strategies/PE_2.dart';
 import '/strategies/PE.dart';
-import '/strategies/intraday.dart';
-import '/strategies/trend.dart';
-import '/stocks/detailedRobinhood.dart';
-
+// import '/strategies/intraday.dart';
+// import '/strategies/trend.dart';
+import '/strategies/twse_signal.dart';
+import '/models/notifications.dart';
 class Home extends StatelessWidget {
   const Home({super.key});
-
+  Widget verticalLine() {
+    return Container(
+      width: 1.0,
+      height: 40.0,
+      color: Colors.white,
+    );
+  }
   @override
   Widget build(BuildContext context) {
+
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -28,63 +36,31 @@ class Home extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      // First column
                       const Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text(
-                              'Column 1',
-                              style: TextStyle(color: Colors.white, fontSize: 16),
-                            ),
-                            Text(
-                              'Content 1',
-                              style: TextStyle(color: Colors.white, fontSize: 12),
-                            ),
+                            Text('123'),
                           ],
                         ),
                       ),
-                      // Vertical line
-                      Container(
-                        width: 1.0,
-                        height: 40.0,
-                        color: Colors.white,
-                      ),
-                      // Second column
-                      const Expanded(
+                      verticalLine(),
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text(
-                              'Column 2',
-                              style: TextStyle(color: Colors.white, fontSize: 16),
-                            ),
-                            Text(
-                              'Content 2',
-                              style: TextStyle(color: Colors.white, fontSize: 12),
-                            ),
+                            ElevatedButton(onPressed: () {
+                              NotificationModel().showNotification(title: 'It works!', body: 'It works');
+                            }, child: const Text("noit")),
                           ],
                         ),
                       ),
-                      // Vertical line
-                      Container(
-                        width: 1.0,
-                        height: 40.0,
-                        color: Colors.white,
-                      ),
-                      // Third column
+                      verticalLine(),
                       const Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text(
-                              'Column 3',
-                              style: TextStyle(color: Colors.white, fontSize: 16),
-                            ),
-                            Text(
-                              'Content 3',
-                              style: TextStyle(color: Colors.white, fontSize: 12),
-                            ),
+                            Text('123'),
                           ],
                         ),
                       ),
@@ -107,11 +83,12 @@ class Home extends StatelessWidget {
         body: const TabBarView(
           children: [
             PE(),
-            Intraday(),
-            Trend(),
+            TwseBullbear(),
+            PeTester(),
           ],
         ),
       ),
     );
   }
+  
 }

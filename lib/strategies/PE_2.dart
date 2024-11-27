@@ -6,14 +6,14 @@ import 'package:test_empty_1/stocks/detailExample.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
-class PE extends StatefulWidget {
-  const PE({super.key});
+class PeTester extends StatefulWidget {
+  const PeTester({super.key});
 
   @override
-  State<PE> createState() => _PEState();
+  State<PeTester> createState() => _PEState();
 }
 
-class _PEState extends State<PE> {
+class _PEState extends State<PeTester> {
   final String start = DateTime.now().subtract(const Duration(days: 90)).toString().substring(0, 10);
   late List<Map<String, dynamic>> trendData;
   late List<Map<String, dynamic>> trendStockPrice;
@@ -51,7 +51,7 @@ class _PEState extends State<PE> {
   Future<void> fetchStockPrice() async {
     if (trendStockList.isEmpty) return;
     final symbols = trendStockList.join(',');
-    final uri = Uri.parse('${Config.baseUrl}/price').replace(queryParameters: {
+    final uri = Uri.parse('${Config.baseUrl}/intraday_data').replace(queryParameters: {
       'codes': symbols,
     });
     var response = await http.get(uri);

@@ -13,14 +13,28 @@ class DetailPage extends StatefulWidget {
 
 class _DetailPage extends State<DetailPage> {
   StockTimeframePerformance? stockData;
+  List<Map<String, dynamic>>? fundamentals;
   Timeframe _selectedTimeframe = Timeframe.sixMonths;
   Uri? uri;
   @override
   void initState() {
     super.initState();
     fetchSingleStock(widget.code, Timeframe.sixMonths);
+    fetchSingleStockInformation(widget.code);
   }
 
+  Future<void> fetchSingleStockInformation(String code) async {
+    uri = Uri.parse("${Config.baseUrl}/maincode").replace(queryParameters: {
+      "codes": code,
+    });
+    var response = await http.get(uri!);
+    if (response.statusCode == 200) {
+      List<dynamic> data = jsonDecode(response.body);
+      print(data);
+    } else {
+      print("response.statusCode for /maincode != 200");
+    }
+  }
   Future<void> fetchSingleStock(String code, Timeframe timeframe) async {
     if (timeframe == Timeframe.oneDay || timeframe == Timeframe.oneWeek){
       uri = Uri.parse("${Config.baseUrl}/detailed_price").replace(queryParameters: {
@@ -141,13 +155,7 @@ class _DetailPage extends State<DetailPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          widget.code, 
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-          ),),
-        Text(
-          '台積電', 
+          '台積電',
           style: TextStyle(
             color: Colors.black,
             fontSize: 20,

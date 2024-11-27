@@ -28,7 +28,7 @@ class _PEState extends State<PE> {
   }
 
   Future<void> fetchStrategyTrend() async {
-    var url = Uri.parse('${Config.baseUrl}/pe'); // Replace with your server URL
+    var url = Uri.parse('${Config.baseUrl}/strategy'); // Replace with your server URL
     var response = await http.get(url);
     if (response.statusCode == 200) {
       final List<dynamic> responseData = jsonDecode(response.body);
