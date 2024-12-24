@@ -25,8 +25,8 @@ class RegisterPageState extends State<Register> {
     final phoneNumber = _phoneNumberController.text;
     final email = _emailController.text;
 
-    final emailRegExp = RegExp(r'^[^@]+@[^@]+$');
-    final passwordRegExp = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$');
+    // final emailRegExp = RegExp(r'^[^@]+@[^@]+$');
+    // final passwordRegExp = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$');
 
     if (username.isNotEmpty &&
         password.isNotEmpty &&
@@ -121,7 +121,7 @@ class RegisterPageState extends State<Register> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Icon(
+              const Icon(
                 Icons.person_add,
                 size: 100,
                 color: Colors.teal,
@@ -140,7 +140,7 @@ class RegisterPageState extends State<Register> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
                   foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),

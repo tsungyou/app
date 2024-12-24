@@ -3,9 +3,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:test_empty_1/config.dart';
+  
 class DetailPage extends StatefulWidget {
   final String code;
-  DetailPage({super.key, required this.code});
+  const DetailPage({super.key, required this.code});
   
   @override
   State<DetailPage> createState() => _DetailPage();
@@ -13,28 +14,14 @@ class DetailPage extends StatefulWidget {
 
 class _DetailPage extends State<DetailPage> {
   StockTimeframePerformance? stockData;
-  List<Map<String, dynamic>>? fundamentals;
   Timeframe _selectedTimeframe = Timeframe.sixMonths;
   Uri? uri;
   @override
   void initState() {
     super.initState();
-    fetchSingleStock(widget.code, Timeframe.sixMonths);
-    fetchSingleStockInformation(widget.code);
+    fetchSingleStock(widget.code, Timeframe.threeMonths);
   }
 
-  Future<void> fetchSingleStockInformation(String code) async {
-    uri = Uri.parse("${Config.baseUrl}/maincode").replace(queryParameters: {
-      "codes": code,
-    });
-    var response = await http.get(uri!);
-    if (response.statusCode == 200) {
-      List<dynamic> data = jsonDecode(response.body);
-      print(data);
-    } else {
-      print("response.statusCode for /maincode != 200");
-    }
-  }
   Future<void> fetchSingleStock(String code, Timeframe timeframe) async {
     if (timeframe == Timeframe.oneDay || timeframe == Timeframe.oneWeek){
       uri = Uri.parse("${Config.baseUrl}/detailed_price").replace(queryParameters: {
@@ -80,7 +67,7 @@ class _DetailPage extends State<DetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.code),
+        title: const Text("Individual Stock Detail Page"),
       ),
       body: stockData == null
         ? const Center(child: CircularProgressIndicator())
@@ -89,7 +76,16 @@ class _DetailPage extends State<DetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            buildStockInfo(),
+            Container(
+              child: Column(
+                children: [
+                  Text('code'),
+                  Text('cname'),
+                  Text('daily return'),
+                  Text('stock price'),
+                ],
+              ),
+            ),
             SizedBox(
               height: 160,
               child: CustomPaint(
@@ -150,28 +146,8 @@ class _DetailPage extends State<DetailPage> {
       ),
     );
   }
-  Widget buildStockInfo() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '台積電',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            
-          ),),
-        Text(
-          '${stockData?.close.toStringAsFixed(2)}(${stockData?.percentageChange.toStringAsFixed(2)}%)', 
-          style: TextStyle(
-            color: stockData!.percentageChange > 0 ? Colors.red : Colors.green,
-            fontSize: 10, 
-          ),
-        ),
-      ],
-    );
-  }
 }
+
 String _timeframeLabel(Timeframe timeframe) {
     switch (timeframe) {
       case Timeframe.oneDay:
@@ -186,10 +162,7 @@ String _timeframeLabel(Timeframe timeframe) {
         return '6M';
       case Timeframe.oneYear:
         return '1Y';
-      default:
-        return timeframe.toString();
     }
-    
 }
 class StockCandleStickPainter extends CustomPainter {
 

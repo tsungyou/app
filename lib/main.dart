@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:test_empty_1/login/login.dart';
-import 'package:test_empty_1/home/home.dart';
+// import 'package:test_empty_1/login/login.dart';
+import "package:test_empty_1/login/login.dart";
+
 void main() {
-  runApp(const MainApp());
+  runApp(const MyApp());
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+  
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      // home: Login(),
-      // home: Trend(),
-      home: Home(),
-      // home: TestHome(),
-      // home: BuyHold(),
+    return MaterialApp(
+      debugShowCheckedModeBanner: true,
+      title: "test",
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+      ),
+    home: const Login(),
     );
   }
 }

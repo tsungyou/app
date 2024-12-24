@@ -81,15 +81,11 @@ class LoginPageState extends State<Login> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Icon(
-                Icons.login, // Add an icon
-                size: 100,
-                color: Colors.teal,
-              ),
+              const Icon( Icons.login, size: 100, color: Colors.teal,),
               const SizedBox(height: 20.0),
               TextField(
                 controller: _emailController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   prefixIcon: Icon(Icons.email),
                   labelText: 'Username',
                   border: OutlineInputBorder(),
@@ -104,7 +100,7 @@ class LoginPageState extends State<Login> {
               const SizedBox(height: 16.0),
               TextField(
                 controller: _passwordController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   prefixIcon: Icon(Icons.lock),
                   labelText: 'Password',
                   border: OutlineInputBorder(),
@@ -123,7 +119,7 @@ class LoginPageState extends State<Login> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal, // Background color
                   foregroundColor: Colors.white, // Text color
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15), // Padding
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15), // Padding
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30), // Rounded corners
                   ),
@@ -136,7 +132,7 @@ class LoginPageState extends State<Login> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey[700], // Background color
                   foregroundColor: Colors.white, // Text color
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15), // Padding
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15), // Padding
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30), // Rounded corners
                   ),

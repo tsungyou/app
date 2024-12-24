@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:test_empty_1/stocks/detailExample.dart';
+import 'package:test_empty_1/stocks/detail_example.dart';
 import 'package:http/http.dart' as http;
-import 'package:test_empty_1/config.dart';
+// import 'package:test_empty_1/config.dart';
 class Trend extends StatefulWidget {
   const Trend({super.key});
   

@@ -263,7 +263,5 @@ String timeframeLabel(Timeframe timeframe) {
       return '6M';
     case Timeframe.oneYear:
       return '1Y';
-    default:
-      return timeframe.toString();
   }
 }
