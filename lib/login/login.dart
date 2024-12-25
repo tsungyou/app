@@ -71,7 +71,7 @@ class LoginPageState extends State<Login> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login/Register'),
+        title: const Text('Login'),
         centerTitle: true,
         backgroundColor: Colors.teal, // Change app bar color
       ),
