@@ -1,5 +1,7 @@
 // import "dart:ffi";
+import "dart:convert";
 import 'package:flutter/material.dart';
+import 'package:test_empty_1/subscription/subscription.dart';
 // import "package:web_socket_channel/io.dart";
 import "package:test_empty_1/config.dart";
 import "package:web_socket_channel/web_socket_channel.dart";
@@ -12,7 +14,16 @@ class Home extends StatefulWidget {
   @override
   State<Home> createState() => _HomeState();
 }
-
+void notificationResponse(NotificationResponse response) {
+  if(response.payload != "null"){
+    print("Notification clicked: ${response.payload}");
+  }
+}
+void backgroundNotificationResponse(NotificationResponse response) {
+  if(response.payload != "null") {
+    print("Background notification Clicked: ${response.payload}");
+  }
+}
 class _HomeState extends State<Home>{
   late WebSocketChannel _channel;
   String _message = 'Message 0';
@@ -25,25 +36,15 @@ class _HomeState extends State<Home>{
     _initializeNotifications();
     _connectToWebSocket();
   }
-  // Notifications =====================
-  void _notificationResponse(NotificationResponse response) {
-    if(response.payload != "null"){
-      print("Notification clicked: ${response.payload}");
-    }
-  }
-  void _backgroundNotificationResponse(NotificationResponse response) {
-    if(response.payload != "null") {
-      print("Background notification Clicked: ${response.payload}");
-    }
-  }
+
   void _initializeNotifications() {
     flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
     const initializationSettings = InitializationSettings(iOS: DarwinInitializationSettings()); // final
 
     flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: _notificationResponse,
-      onDidReceiveBackgroundNotificationResponse: _backgroundNotificationResponse,
+      onDidReceiveNotificationResponse: notificationResponse,
+      onDidReceiveBackgroundNotificationResponse: backgroundNotificationResponse,
     );
   }
   Future<void> _showIntradayNotification(String message) async {
@@ -62,7 +63,13 @@ class _HomeState extends State<Home>{
     _channel = WebSocketChannel.connect(Uri.parse(Config.webSocketUrl));
     _channel.stream.listen((message) {
       setState(() {
-        _message = message;
+        final jsonData = jsonDecode(message);
+        final da = jsonData['da'];
+        final daLength = da.length;
+        final formattedMessage =
+        "Code: ${jsonData['code']};${da.substring(daLength-8, daLength)};股價: ${jsonData['cl']}";
+
+        _message = formattedMessage; // Update UI with formatted message
         _showIntradayNotification(_message);
         print("received");
       });
@@ -83,9 +90,46 @@ class _HomeState extends State<Home>{
       _bottomNavigatorIndex = index;
     });
   }
+  void _subsIconPressed() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SubscriptionPage()),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text("策略")),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              child: Stack(
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.shopping_cart,
+                        color: Colors.black,
+                        size: 30,
+                      ),
+                      onPressed: _subsIconPressed,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              title: const Text("策略1"),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            )
+          ]
+        ),
+      ),
       body: Center(
         child: _getCurrentPage(),
       ),
