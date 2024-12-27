@@ -6,7 +6,7 @@ import "dart:convert";
 
 import 'package:test_empty_1/subscription/subscription.dart';
 import "package:test_empty_1/config.dart";
-
+import 'package:test_empty_1/home/strategy_list.dart' as strats;
 class Home extends StatefulWidget {
   const Home({super.key});
   @override
@@ -25,8 +25,10 @@ void backgroundNotificationResponse(NotificationResponse response) {
 class _HomeState extends State<Home>{
   late WebSocketChannel _channel;
   String _message = 'Message 0';
+  int _strategyIndex = 0;
+  final Map<String, Widget> _strategyList = strats.strategyList;
+  final Map<String, Widget> _descriptionList = strats.descriptionList;
   late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
-  
   int _bottomNavigatorIndex = 0;
   @override
   void initState(){
@@ -81,7 +83,8 @@ class _HomeState extends State<Home>{
   }
 
   Widget _getCurrentPage(){
-    return Text(_message);
+    if(_bottomNavigatorIndex == 0) {return _strategyList.values.elementAt(_strategyIndex);}
+    else {return _descriptionList.values.elementAt(_strategyIndex);}
   }
   void _onBottomNavigatortapped(int index) {
     setState(() {
@@ -94,10 +97,16 @@ class _HomeState extends State<Home>{
       MaterialPageRoute(builder: (context) => const SubscriptionPage()),
     );
   }
+
+  void _onSidebarTapped(String title) {
+    setState(() {
+      _strategyIndex = _strategyList.keys.toList().indexOf(title);
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("策略")),
+      appBar: AppBar(title: Text(_strategyList.keys.elementAt(_strategyIndex))),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -119,13 +128,14 @@ class _HomeState extends State<Home>{
                 ],
               ),
             ),
-            ListTile(
-              title: const Text("策略1"),
+            ..._strategyList.keys.map((strategyTitle) => ListTile(
+              title: Text(strategyTitle),
               onTap: () {
+                _onSidebarTapped(strategyTitle);
                 Navigator.pop(context);
               },
-            )
-          ]
+            )),
+          ],
         ),
       ),
       body: Center(
