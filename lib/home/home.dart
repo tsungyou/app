@@ -1,14 +1,12 @@
-// import "dart:ffi";
-import "dart:convert";
 import 'package:flutter/material.dart';
-import 'package:test_empty_1/subscription/subscription.dart';
-// import "package:web_socket_channel/io.dart";
-import "package:test_empty_1/config.dart";
-import "package:web_socket_channel/web_socket_channel.dart";
 import "package:flutter_local_notifications/flutter_local_notifications.dart";
+import "package:web_socket_channel/web_socket_channel.dart";
 import "package:web_socket_channel/status.dart" as web_socket_status;
-// import '/strategies/intraday.dart';
-// import '/strategies/trend.dart';
+import "dart:convert";
+
+import 'package:test_empty_1/subscription/subscription.dart';
+import "package:test_empty_1/config.dart";
+
 class Home extends StatefulWidget {
   const Home({super.key});
   @override
@@ -89,7 +87,7 @@ class _HomeState extends State<Home>{
     setState(() {
       _bottomNavigatorIndex = index;
     });
-  }
+  } 
   void _subsIconPressed() {
     Navigator.push(
       context,
