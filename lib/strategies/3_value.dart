@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:test_empty_1/config.dart';
 import 'package:http/http.dart' as http;
@@ -52,7 +51,7 @@ class _Value extends State<Value>{
       });
       fetchStockPrice();
     } else {
-      print('Failed to load strategy trend data');
+      // print('Failed to load strategy trend data');
     }
   }
 
@@ -82,14 +81,13 @@ class _Value extends State<Value>{
         }
       });
     } else {
-      print('Failed to load stock price data');
-      print(response.body);
+      // print('Failed to load stock price data');
+      // print(response.body);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    int day = 0;
 
     return Scaffold(
       body: Container(
@@ -109,7 +107,7 @@ class _Value extends State<Value>{
           itemBuilder: (context, index) {
             final code = trendStockList[index];
             return Card(
-              color: Color.fromARGB(255, 208, 206, 206),
+              color: const Color.fromARGB(255, 208, 206, 206),
 
               margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
               elevation: 5,

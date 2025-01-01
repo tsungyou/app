@@ -101,7 +101,6 @@ class _CDP extends State<CDP> {
 
   @override
   Widget build(BuildContext context) {
-    int day = 0;
 
     return Scaffold(
       body: Container(
@@ -148,7 +147,7 @@ class _CDP extends State<CDP> {
                 ]
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
