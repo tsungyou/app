@@ -11,17 +11,19 @@ class TimeManagement extends StatefulWidget {
 }
 
 class _TimeManagementState extends State<TimeManagement> {
-  List<String> stockList = ["3086", "4563", "4977", "5234"];
+  List<String> stockList = ["2330", "1234", "4977", "5234"];
   Map<String, dynamic> stockPrice = {};
-  final int refreshIntervalMinutes = 5;
+  final int refreshIntervalSeconds = 300;
   late Timer _refreshTimer;
   int _remainingSeconds = 300; // 5 minutes in seconds
-
+  int signalPassedDay = 3;
+  int signalPeriod = 5;
+  String direction = "作多";
   Future<void> refreshData() async {
     final newStockPrice = await fetchStockPrice(stockList);
     setState(() {
       stockPrice = newStockPrice;
-      _remainingSeconds = refreshIntervalMinutes * 60;
+      _remainingSeconds = refreshIntervalSeconds;
     });
   }
 
@@ -72,9 +74,9 @@ class _TimeManagementState extends State<TimeManagement> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('時間: ${DateTime.now().toString().substring(0,10)}'),
-                      Text('方向: 作多'),
-                      Text('訊號天期: 5天'),
-                      Text('目標持倉天期: 10天'),
+                      Text('方向: $direction'),
+                      Text('訊號天期: $signalPassedDay天'),
+                      Text('目標持倉天期: $signalPeriod天'),
                     ],
                   ),
                   // Right side placeholders
@@ -108,6 +110,13 @@ class _TimeManagementState extends State<TimeManagement> {
                             onTap: () {},
                             child: Row(
                               children: [
+                                Column(
+                                  children: [
+                                    Text(code),
+                                    Text(code),
+                                    Text("5.6%"),
+                                  ],
+                                ),
                                 Expanded(
                                   child: stockPrice.containsKey(code) ? 
                                     IntradayChart(
