@@ -27,6 +27,7 @@ dependencies:
   fl_chart: ^0.68.0
   flutter_local_notifications: ^17.2.2
   web_socket_channel: ^3.0.1
+  smooth_page_indicator: ^1.2.0+3
 dev_dependencies:
   flutter_test:
     sdk: flutter
