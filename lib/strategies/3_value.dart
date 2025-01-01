@@ -30,7 +30,7 @@ class _Value extends State<Value>{
   List<String> trendStockList = ["2330", "1234"];
   late List<Map<String, dynamic>> trendStockPrice;
   late Map<String, StockFundamentals> trendStockFundamentals = {};
-  Map<String, dynamic> groupedTrendStockPrice = {};
+  Map<String, dynamic> stockPrice = {};
   @override initState() {
     super.initState();
     fetchStockPrice();
@@ -75,10 +75,10 @@ class _Value extends State<Value>{
           'cl': item['cl'],
         }).toList();
         for (var item in trendStockPrice) {
-          if (!groupedTrendStockPrice.containsKey(item['code'])) {
-            groupedTrendStockPrice[item['code']] = [];
+          if (!stockPrice.containsKey(item['code'])) {
+            stockPrice[item['code']] = [];
           }
-          groupedTrendStockPrice[item['code']]!.add(item);
+          stockPrice[item['code']]!.add(item);
         }
       });
     } else {
@@ -149,7 +149,7 @@ class _Value extends State<Value>{
                               flex: 4,
                               child: IntradayChart(
                                 code: code,
-                                groupedTrendStockPrice: groupedTrendStockPrice,
+                                stockPrice: stockPrice,
                                 chartHeight: chartHeight,
                                 chartWidth: chartWidth,
                               ),
@@ -227,13 +227,13 @@ class IntradayChart extends StatelessWidget {
   final String code;
   final double chartWidth;
   final double chartHeight;
-  final Map<String, dynamic> groupedTrendStockPrice;
+  final Map<String, dynamic> stockPrice;
 
-  IntradayChart({Key? key, required this.code, required this.groupedTrendStockPrice, required this.chartHeight, required this.chartWidth}) : super(key: key);
+  IntradayChart({Key? key, required this.code, required this.stockPrice, required this.chartHeight, required this.chartWidth}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    List<ChartData> chartData = getChartData(code, groupedTrendStockPrice);
+    List<ChartData> chartData = getChartData(code, stockPrice);
     double highest = double.negativeInfinity;
     double lowest = double.infinity;
     for (var data in chartData) {
@@ -274,10 +274,10 @@ class IntradayChart extends StatelessWidget {
     );
   }
 
-  List<ChartData> getChartData(String code, Map<String, dynamic> groupedTrendStockPrice) {
+  List<ChartData> getChartData(String code, Map<String, dynamic> stockPrice) {
     List<ChartData> chartData = [];
-    if (groupedTrendStockPrice[code] != null) {
-      for (var item in groupedTrendStockPrice[code]!) {
+    if (stockPrice[code] != null) {
+      for (var item in stockPrice[code]!) {
         chartData.add(ChartData(item['da'], item['cl'].toDouble()));
       }
     }
