@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
+
 class CDP extends StatefulWidget {
   const CDP({super.key});
+
   @override
-  State<CDP> createState() => _CDP();
+  State<CDP> createState() => _CDPState();
 }
 
-class _CDP extends State<CDP>{
+class _CDPState extends State<CDP> {
   @override
   Widget build(BuildContext context) {
-    int day = 0;
-
-    return Scaffold(
-      body: Text("1234"),
-    );
+    return const Placeholder();
   }
 }
