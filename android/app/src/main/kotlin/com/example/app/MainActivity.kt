@@ -1,4 +1,4 @@
-package com.example.app
+package com.edward.signal
 
 import io.flutter.embedding.android.FlutterActivity
 
