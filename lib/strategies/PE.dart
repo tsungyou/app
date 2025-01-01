@@ -308,7 +308,7 @@ class StockFundamentals {
   final String codename;
   final String industry;
 
-  const StockFundamentals(
+  const StockFundamentals( 
     this.code, 
     this.codename,
     this.industry,
