@@ -106,7 +106,19 @@ class _HomeState extends State<Home>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_strategyList.keys.elementAt(_strategyIndex))),
+      appBar: AppBar(
+        title: Text(_strategyList.keys.elementAt(_strategyIndex)),
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.shopping_cart,
+              color: Colors.black,
+              size: 30,
+            ),
+            onPressed: _subsIconPressed,
+          ),
+        ],
+      ),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,

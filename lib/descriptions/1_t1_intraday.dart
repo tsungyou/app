@@ -8,7 +8,6 @@ class IntradayT1 extends StatefulWidget {
 class _IntradayT1 extends State<IntradayT1>{
   @override
   Widget build(BuildContext context) {
-    int day = 0;
 
     return Scaffold(
       body: const Text("1234"),

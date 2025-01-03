@@ -8,7 +8,6 @@ class Value extends StatefulWidget {
 class _Value extends State<Value>{
   @override
   Widget build(BuildContext context) {
-    int day = 0;
 
     return Scaffold(
       body: Text("1234"),
