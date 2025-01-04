@@ -43,11 +43,14 @@ class _HomeState extends State<Home>{
   void initState(){
     super.initState();
     _initializeNotifications();
+    _initializeUserStrategies();
     _connectToWebSocket();
+    
+    // IAP
     final Stream purchaseUpdated = InAppPurchase.instance.purchaseStream;
     _iapSubscription = purchaseUpdated.listen((purchaseDetailsList) {
       print("purchase stream started");
-      IapService().listenToPurchaseUpdated(purchaseDetailsList);
+      IapService(AuthService().currentUser!.uid).listenToPurchaseUpdated(purchaseDetailsList);
     }, onDone: () {
       _iapSubscription.cancel();
     }, onError: (error) {
@@ -76,14 +79,32 @@ class _HomeState extends State<Home>{
       payload: 'item x',
     );
   }
+
+  void _initializeUserStrategies() async {
+    final docSnapshot = await FirebaseFirestore.instance
+      .collection("users")
+      .doc(AuthService().currentUser!.uid)
+      .get();
+    final userStrategies = docSnapshot.data()?['strategies'];
+    print(userStrategies);
+    // var subList = await FirebaseFirestore.instance
+    // .collection("user")
+    // .doc(AuthService().currentUser?.uid)
+    // .collection("strategies")
+    // .get();
+    // bool isStrategyValid(Map<String, dynamic> strategy) {
+    //   if (!strategy['active']) return false;
+      
+    //   final expiration = strategy['expirationDate'];
+    //   if (expiration == null) return false;
+      
+    //   final expirationDate = DateTime.fromMillisecondsSinceEpoch(expiration);
+    //   return DateTime.now().isBefore(expirationDate);
+    // }
+  }
   // Notifications ===================
   void _connectToWebSocket() async {
-    var subList = await FirebaseFirestore.instance
-    .collection("user")
-    .doc(AuthService().currentUser?.uid)
-    .collection("strategies")
-    .get();
-    
+
     _channel = WebSocketChannel.connect(Uri.parse(Config.webSocketUrl));
     _channel.stream.listen((message) {
       setState(() {
