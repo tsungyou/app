@@ -10,7 +10,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await AuthService().getOrCreateUser();
-
+  
   runApp(
     const MaterialApp(debugShowCheckedModeBanner: false, home: Home(),));
 }

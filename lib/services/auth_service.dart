@@ -13,7 +13,7 @@ class AuthService {
     await FirebaseFirestore.instance
     .collection("user")
     .doc(AuthService().currentUser?.uid)
-    .collection('questions')
+    .collection('strategies')
     .add({
       "1": false,
       "2": false,

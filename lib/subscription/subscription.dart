@@ -12,13 +12,14 @@ class SubscriptionPage extends StatefulWidget {
 }
 
 
-const List<String> _prudoctIds = <String>[
+const List<String> _productIds = <String>[
   "strategy_1_month_1",
 ];
 class _SubscriptionPageState extends State<SubscriptionPage> {
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   bool _isAvailable = false;
   String? _notice;
+  List<ProductDetails> _products = [];
 
   @override
   void initState(){
@@ -31,7 +32,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       _isAvailable = isAvailable;
     });
 
-    if(_isAvailable) {
+    if(!_isAvailable) {
       _notice = "There are no upgrades at this time";
       return;
     }
@@ -40,16 +41,25 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       _notice = "There is a connection to the store";
     });
     // Get IAP
+    ProductDetailsResponse productDetailsResponse = await _inAppPurchase.queryProductDetails(_productIds.toSet());
+  
+    setState(() {
+      _products = productDetailsResponse.productDetails;
+      print(_products);
+      print("not found products: ${productDetailsResponse.notFoundIDs}");
+    });
 
+    if(productDetailsResponse.error != null) {
+      setState(() {
+        _notice = "There was a problem connecting to the store";
+      });
+    } else if (productDetailsResponse.productDetails.isEmpty) {
+      setState(() {
+        _notice = "There no IAP product to be shown";
+      });
+    }
   }
 
-  // final List<String> _strategies = ['策略A', '策略B', '策略C', '策略D'];
-  // final List<bool> _subscribed = [false, false, false, false];
-  // void _toggleSubscription(int index) {
-  //   setState(() {
-  //     _subscribed[index] = !_subscribed[index];
-  //   });
-  // }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,69 +74,37 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 padding: const EdgeInsets.all(8.0),
                 child: Text(_notice!),
               ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _products.length,
+                itemBuilder: (BuildContext context, int index) {
+                  final ProductDetails productDetails = _products[index];
+                  final PurchaseParam purchaseParam = PurchaseParam(productDetails: productDetails);
+                  return Card(  
+                    
+                    child: Row( 
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Column(
+                          children: [
+                            Text(productDetails.title, style: const TextStyle(fontSize: 20),),
+                            Text(productDetails.description),
+                          ],
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            InAppPurchase.instance.buyNonConsumable(purchaseParam: purchaseParam);
+                          }, 
+                          child: Text("${productDetails.price}/月")),
+                      ],
+                    ),
+                  );
+                }
+              )
+            ),
           ],
         ),
       ),
-      // ListView.builder(
-      //   itemCount: _strategies.length,
-      //   itemBuilder: (context, index) {
-      //     if (index == 0) {
-      //       return Container(
-      //         child: IconButton(
-      //           onPressed: () {
-      //              FirebaseFirestore.instance
-      //             .collection("user")
-      //             .doc(AuthService().currentUser?.uid)
-      //             .collection('strategies')
-      //             .add({
-      //               "1": false,
-      //               "2": false,
-      //               "3": false,
-      //               "4": false,
-      //               "5": false,
-      //               "6": false,
-      //               "7": false,
-      //               "8": false,
-      //               "9": false,
-      //               "10": false,
-      //               "11": false,
-      //               "12": false
-      //             });
-      //             print("inserted into ${AuthService().currentUser?.uid}");
-
-      //             // Get data from Firestore
-      //             // var snapshot = await FirebaseFirestore.instance
-      //             // .collection("user")
-      //             // .doc(AuthService().currentUser?.uid)
-      //             // .collection('strategies')
-      //             // .get();
-
-      //             // // Convert to map
-      //             // Map<String, dynamic> strategiesMap = {};
-      //             // for (var doc in snapshot.docs) {
-      //             //   strategiesMap[doc.id] = doc.data();
-      //             // }
-      //             // print(strategiesMap);
-      //           },
-      //           icon: const Icon(Icons.abc_outlined),
-      //         ),
-      //       );
-      //     } else {
-      //       return Card(
-      //         child: ListTile(
-      //           title: Text(_strategies[index]),
-      //           trailing: IconButton(
-      //             icon: Icon(
-      //               _subscribed[index] ? Icons.check_circle : Icons.circle_outlined,
-      //               color: _subscribed[index] ? Colors.green : Colors.grey,
-      //             ),
-      //             onPressed: () => _toggleSubscription(index),
-      //           ),
-      //         ),
-      //       );
-      //     }
-      //   },
-      // ),
     );
   }
 }

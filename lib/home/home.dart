@@ -1,5 +1,11 @@
+import "dart:async";
+
+import "package:cloud_firestore/cloud_firestore.dart";
 import 'package:flutter/material.dart';
 import "package:flutter_local_notifications/flutter_local_notifications.dart";
+import "package:in_app_purchase/in_app_purchase.dart";
+import "package:test_empty_1/services/auth_service.dart";
+import "package:test_empty_1/services/iap_service.dart";
 import "package:web_socket_channel/web_socket_channel.dart";
 import "package:web_socket_channel/status.dart" as web_socket_status;
 import "dart:convert";
@@ -30,11 +36,23 @@ class _HomeState extends State<Home>{
   final Map<String, Widget> _descriptionList = strats.descriptionList;
   late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
   int _bottomNavigatorIndex = 0;
+
+  late StreamSubscription<List<PurchaseDetails>> _iapSubscription;
+
   @override
   void initState(){
     super.initState();
     _initializeNotifications();
     _connectToWebSocket();
+    final Stream purchaseUpdated = InAppPurchase.instance.purchaseStream;
+    _iapSubscription = purchaseUpdated.listen((purchaseDetailsList) {
+      print("purchase stream started");
+      IapService().listenToPurchaseUpdated(purchaseDetailsList);
+    }, onDone: () {
+      _iapSubscription.cancel();
+    }, onError: (error) {
+      _iapSubscription.cancel();
+    }) as StreamSubscription<List<PurchaseDetails>>;
   }
 
   void _initializeNotifications() {
@@ -59,7 +77,13 @@ class _HomeState extends State<Home>{
     );
   }
   // Notifications ===================
-  void _connectToWebSocket() {
+  void _connectToWebSocket() async {
+    var subList = await FirebaseFirestore.instance
+    .collection("user")
+    .doc(AuthService().currentUser?.uid)
+    .collection("strategies")
+    .get();
+    
     _channel = WebSocketChannel.connect(Uri.parse(Config.webSocketUrl));
     _channel.stream.listen((message) {
       setState(() {
